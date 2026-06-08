@@ -44,28 +44,15 @@ class ReglaCifradoTraslacion(ReglaCifrado):
         caracteres_invalidos = self.encontrar_no_ascii_mensaje(mensaje)
 
         if numeros:
-            mensaje_error = ",".join(
-                f"el mensaje contiene errores {i}: {c}"
-                for (i, c) in numeros
-            )
-            errores.append(
-                ContieneNumero(mensaje_error)
-            )
+            errores.append(ContieneNumero(str(numeros)))
 
         if caracteres_invalidos:
-            mensaje_error = ",".join(
-                f"el mensaje contiene caracteres no validos {i}: {c}"
-                for (i, c) in caracteres_invalidos
-            )
-            errores.append(
-                ContieneNoAscii(mensaje_error)
-            )
+            errores.append(ContieneNoAscii(str(caracteres_invalidos)))
 
         mensaje_espacios = mensaje.strip()
         if not mensaje_espacios or not any(c.isalpha() for c in mensaje):
-            errores.append(
-                SinLetras("SinLetras")
-            )
+
+            errores.append(SinLetras(str(mensaje_espacios)))
 
         if errores:
             raise ExceptionGroup(
@@ -119,23 +106,13 @@ class ReglaCifradoNumerico (ReglaCifrado):
         errores = []
 
         if numero:
-            mensaje_error = ",".join(
-                f"número en la posición {i}: {c}"
-                for (i,c) in numero
-            )
-            errores.append(
-                ContieneNumero(mensaje_error)
-            )
+            errores.append(ContieneNumero(str(numero)))
 
         if mensaje != mensaje.strip():
-                errores.append(
-                    NoTrim("NoTrim")
-            )
+                errores.append(NoTrim(str(mensaje)))
 
         if "  " in mensaje:
-            errores.append(
-                DobleEspacio("DobleEspacio")
-            )
+            errores.append(DobleEspacio(str(" ")))
 
         if errores:
             raise ExceptionGroup(
@@ -179,8 +156,6 @@ class Cifrador:
 
     def encriptar(self, mensaje: str) -> str:
         return self.agente.encriptar(mensaje)
-
-
 
     def desencriptar(self, mensaje: str) -> str:
         return self.agente.desencriptar(mensaje)
