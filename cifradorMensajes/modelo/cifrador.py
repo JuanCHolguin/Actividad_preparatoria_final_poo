@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from cifradorMensajes.modelo.errores import ContieneNumero, ContieneNoAscii, SinLetras
+from cifradorMensajes.modelo.errores import ContieneNumero, ContieneNoAscii, SinLetras, NoTrim, DobleEspacio
 
 
 class ReglaCifrado(ABC):
@@ -76,7 +76,6 @@ class ReglaCifradoTraslacion(ReglaCifrado):
             )
         return True
 
-
     def encriptar(self, mensaje: str) -> str:
         mensaje = mensaje.lower()
         self.mensaje_valido(mensaje)
@@ -95,7 +94,6 @@ class ReglaCifradoTraslacion(ReglaCifrado):
 
     def desencriptar(self, mensaje: str) -> str:
         mensaje = mensaje.lower()
-        self.mensaje_valido(mensaje)
 
         resultado = ""
 
@@ -116,10 +114,10 @@ class ReglaCifradoNumerico (ReglaCifrado):
 
     def mensaje_valido(self, mensaje: str) -> bool:
         mensaje = mensaje.lower()
-        self.mensaje_valido(mensaje)
 
         numero = self.encontrar_numeros_mensaje(mensaje)
         errores = []
+
         if numero:
             mensaje_error = ",".join(
                 f"número en la posición {i}: {c}"
@@ -129,13 +127,49 @@ class ReglaCifradoNumerico (ReglaCifrado):
                 ContieneNumero(mensaje_error)
             )
 
+        if mensaje != mensaje.strip():
+                errores.append(
+                    NoTrim("NoTrim")
+            )
+
+        if "  " in mensaje:
+            errores.append(
+                DobleEspacio("DobleEspacio")
+            )
+
+        if errores:
+            raise ExceptionGroup(
+                "ContieneNumero"
+                "NoTrim"
+                "DobleEspacio",
+                errores
+            )
+        return True
 
     def encriptar(self, mensaje: str) -> str:
-        pass
+        mensaje = mensaje.lower()
+        self.mensaje_valido(mensaje)
+
+        resultado = []
+        for c in mensaje:
+            if c.isascii():
+                caracter = ord(c) * self.token
+                resultado.append(str(caracter))
+        return " ".join(resultado)
+
 
     def desencriptar(self, mensaje: str) -> str:
-        pass
+        mensaje = mensaje.lower()
+        self.mensaje_valido(mensaje)
 
+        resultado = []
+        mensaje = mensaje.split()
+        for c in mensaje:
+            caracter = int(c) / self.token
+            nuevo_caracter = chr(int(caracter))
+            resultado += nuevo_caracter
+
+        return "".join(resultado)
 
 
 class Cifrador:
