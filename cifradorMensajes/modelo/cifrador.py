@@ -62,7 +62,7 @@ class ReglaCifradoTraslacion(ReglaCifrado):
             )
 
         mensaje_espacios = mensaje.strip()
-        if not mensaje_espacios:
+        if not mensaje_espacios or not any(c.isalpha() for c in mensaje):
             errores.append(
                 SinLetras("SinLetras")
             )
@@ -75,6 +75,7 @@ class ReglaCifradoTraslacion(ReglaCifrado):
                 errores
             )
         return True
+
 
     def encriptar(self, mensaje: str) -> str:
         mensaje = mensaje.lower()
@@ -91,7 +92,6 @@ class ReglaCifradoTraslacion(ReglaCifrado):
             else:
                 resultado += c
         return resultado
-
 
     def desencriptar(self, mensaje: str) -> str:
         mensaje = mensaje.lower()
@@ -114,14 +114,29 @@ class ReglaCifradoNumerico (ReglaCifrado):
     def __init__(self, token: int):
         super().__init__(token)
 
+    def mensaje_valido(self, mensaje: str) -> bool:
+        mensaje = mensaje.lower()
+        self.mensaje_valido(mensaje)
+
+        numero = self.encontrar_numeros_mensaje(mensaje)
+        errores = []
+        if numero:
+            mensaje_error = ",".join(
+                f"número en la posición {i}: {c}"
+                for (i,c) in numero
+            )
+            errores.append(
+                ContieneNumero(mensaje_error)
+            )
+
+
     def encriptar(self, mensaje: str) -> str:
         pass
 
     def desencriptar(self, mensaje: str) -> str:
         pass
 
-    def mensaje_valido(self, mensaje: str) -> bool:
-        pass
+
 
 class Cifrador:
 
